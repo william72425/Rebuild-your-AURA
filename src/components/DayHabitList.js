@@ -1,6 +1,6 @@
 import React from 'react';
 
-function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
+function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit }) {
   const selectedDateObj = new Date(selectedDate);
   selectedDateObj.setHours(0, 0, 0, 0);
 
@@ -76,7 +76,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {status !== 'completed' && (
                     <button
                       onClick={() => onUpdateHabitStatus(habit.id, selectedDateObj, 'completed')}
@@ -129,6 +129,21 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
                       ↺ Clear
                     </button>
                   )}
+
+                  <button
+                    onClick={() => onDeleteHabit(habit.id)}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}
+                  >
+                    🗑 Delete
+                  </button>
                 </div>
               </div>
             );
@@ -140,7 +155,8 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
         💡 <strong>How it works:</strong><br />
         ✅ Complete = You did it!<br />
         ❌ Not Complete = You didn't do it<br />
-        ↺ Clear = Remove record (no data)
+        ↺ Clear = Remove record (no data)<br />
+        🗑 Delete = Remove habit permanently
       </div>
     </div>
   );
