@@ -3,38 +3,35 @@ import React from 'react';
 function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
   const selectedDateObj = new Date(selectedDate);
   selectedDateObj.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
-  // Habit တစ်ခုအတွက် သတ်မှတ်ရက်မှာ ဘယ် status ရှိလဲ စစ်မယ်
   const getHabitStatus = (habit) => {
-    const record = (habit.records || []).find(r => 
+    const record = (habit.records || []).find(r =>
       new Date(r.date).toDateString() === selectedDateObj.toDateString()
     );
-    
+
     if (!record) {
       return { status: 'no_data', value: null };
     }
-    
+
     if (record.value === true) {
       return { status: 'completed', value: true };
     }
-    
+
     if (record.value === false) {
       return { status: 'not_completed', value: false };
     }
-    
+
     return { status: 'no_data', value: null };
   };
 
   const getStatusStyle = (status) => {
-    switch(status) {
+    switch (status) {
       case 'completed':
-        return { bg: '#e8f5e9', border: '#4CAF50', text: '#2e7d32', icon: '✅', btnText: '✓ Completed', btnBg: '#4CAF50' };
+        return { bg: '#e8f5e9', border: '#4CAF50', text: '#2e7d32', icon: '✅' };
       case 'not_completed':
-        return { bg: '#ffebee', border: '#f44336', text: '#c62828', icon: '❌', btnText: '✗ Not Completed', btnBg: '#f44336' };
+        return { bg: '#ffebee', border: '#f44336', text: '#c62828', icon: '❌' };
       default:
-        return { bg: '#f5f5f5', border: '#ccc', text: '#999', icon: '⚪', btnText: '⚪ No Record', btnBg: '#ccc' };
+        return { bg: '#f5f5f5', border: '#ccc', text: '#999', icon: '⚪' };
     }
   };
 
@@ -43,7 +40,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
       <h3 style={{ color: 'white', marginBottom: '15px' }}>
         📋 {selectedDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
       </h3>
-      
+
       {habits.length === 0 ? (
         <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '40px', textAlign: 'center', color: 'white' }}>
           No habits yet. Add your first habit!
@@ -53,7 +50,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
           {habits.map(habit => {
             const { status } = getHabitStatus(habit);
             const style = getStatusStyle(status);
-            
+
             return (
               <div
                 key={habit.id}
@@ -78,7 +75,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
                     {habit.type} • 🔥 {habit.streak || 0} day streak
                   </div>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {status !== 'completed' && (
                     <button
@@ -97,7 +94,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
                       ✓ Complete
                     </button>
                   )}
-                  
+
                   {status !== 'not_completed' && (
                     <button
                       onClick={() => onUpdateHabitStatus(habit.id, selectedDateObj, 'not_completed')}
@@ -115,7 +112,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
                       ✗ Not Complete
                     </button>
                   )}
-                  
+
                   {status !== 'no_data' && (
                     <button
                       onClick={() => onUpdateHabitStatus(habit.id, selectedDateObj, 'no_data')}
@@ -138,12 +135,12 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus }) {
           })}
         </div>
       )}
-      
+
       <div style={{ marginTop: '20px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', color: 'white', fontSize: '12px', textAlign: 'center' }}>
         💡 <strong>How it works:</strong><br />
         ✅ Complete = You did it!<br />
         ❌ Not Complete = You didn't do it<br />
-        ⚪ Clear = Remove record (no data)
+        ↺ Clear = Remove record (no data)
       </div>
     </div>
   );
