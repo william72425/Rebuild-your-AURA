@@ -11,22 +11,18 @@ function HabitHeatmap({ habits, selectedHabitId }) {
     );
   }
 
-  // Get last 30 days
   const getLast30Days = () => {
     const days = [];
     for (let i = 29; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toDateString();
-      const completed = (habit.records || []).some(r => new Date(r.date).toDateString() === dateStr);
-      days.push({ date, completed, day: date.getDate(), month: date.getMonth() });
+      const completed = (habit.records || []).some(r => new Date(r.date).toDateString() === date.toDateString());
+      days.push({ date, completed, day: date.getDate() });
     }
     return days;
   };
 
   const days = getLast30Days();
-  
-  // Group into weeks
   const weeks = [];
   for (let i = 0; i < days.length; i += 7) {
     weeks.push(days.slice(i, i + 7));
@@ -60,8 +56,7 @@ function HabitHeatmap({ habits, selectedHabitId }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     margin: '0 auto',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s'
+                    cursor: 'pointer'
                   }}
                   title={`${day.date.toDateString()}: ${day.completed ? 'Completed ✓' : 'Not completed ✗'}`}>
                     <span style={{ fontSize: '11px', color: day.completed ? 'white' : '#999' }}>
