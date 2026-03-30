@@ -270,6 +270,7 @@ function HabitsPage({ habits, setHabits }) {
                 key={habit.id}
                 habit={habit}
                 onPress={() => handleHabitClick(habit)}
+                onDelete={() => deleteHabit(habit.id)}
               />
             ))
           )}
@@ -289,14 +290,14 @@ function HabitsPage({ habits, setHabits }) {
       )}
 
       {showEntryModal && (
-  <HabitEntryModal
-    habit={showEntryModal.habit}
-    date={showEntryModal.date}
-    onSave={updateHabitEntry}
-    onMarkNotCompleted={markNotCompleted}
-    onClose={() => setShowEntryModal(null)}
-  />
-)}
+        <HabitEntryModal
+          habit={showEntryModal.habit}
+          date={showEntryModal.date}
+          onSave={updateHabitEntry}
+          onMarkNotCompleted={markNotCompleted}
+          onClose={() => setShowEntryModal(null)}
+        />
+      )}
     </div>
   );
 }
