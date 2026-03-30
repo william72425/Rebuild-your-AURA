@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import HabitCard from '../components/HabitCard';
 import ProgressChart from '../components/ProgressChart';
 import HabitHeatmap from '../components/HabitHeatmap';
 import DateNavigator from '../components/DateNavigator';
@@ -61,23 +60,6 @@ function HabitsPage({ habits, setHabits }) {
     }
   };
 
-  const completeHabit = (id) => {
-    const today = new Date().toDateString();
-    setHabits(habits.map(habit => {
-      if (habit.id === id && habit.lastCompleted !== today) {
-        const newStreak = (habit.streak || 0) + 1;
-        return {
-          ...habit,
-          streak: newStreak,
-          longestStreak: Math.max(newStreak, habit.longestStreak || 0),
-          lastCompleted: today,
-          records: [...(habit.records || []), { date: today, value: true }]
-        };
-      }
-      return habit;
-    }));
-  };
-
   const updateHabitStatus = (habitId, date, newStatus) => {
     const dateStr = date.toDateString();
 
@@ -87,20 +69,16 @@ function HabitsPage({ habits, setHabits }) {
       let newRecords = [...(habit.records || [])];
       const existingIndex = newRecords.findIndex(r => new Date(r.date).toDateString() === dateStr);
 
-      // Remove existing record if any
       if (existingIndex !== -1) {
         newRecords.splice(existingIndex, 1);
       }
 
-      // Add new record based on status
       if (newStatus === 'completed') {
         newRecords.push({ date: date.toISOString(), value: true });
       } else if (newStatus === 'not_completed') {
         newRecords.push({ date: date.toISOString(), value: false });
       }
-      // if newStatus === 'no_data', just remove record (already done above)
 
-      // Recalculate streak (based on consecutive completed days)
       let streak = 0;
       let checkDate = new Date();
       checkDate.setHours(0, 0, 0, 0);
