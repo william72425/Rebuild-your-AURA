@@ -289,14 +289,14 @@ function HabitsPage({ habits, setHabits }) {
       )}
 
       {showEntryModal && (
-        <HabitEntryModal
-          habit={showEntryModal.habit}
-          date={showEntryModal.date}
-          onSave={updateHabitEntry}
-          onUpdateHabitStatus={markNotCompleted}
-          onClose={() => setShowEntryModal(null)}
-        />
-      )}
+  <HabitEntryModal
+    habit={showEntryModal.habit}
+    date={showEntryModal.date}
+    onSave={updateHabitEntry}
+    onMarkNotCompleted={markNotCompleted}
+    onClose={() => setShowEntryModal(null)}
+  />
+)}
     </div>
   );
 }
