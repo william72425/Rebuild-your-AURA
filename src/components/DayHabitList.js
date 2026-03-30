@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit }) {
-  const [showValueInput, setShowValueInput] = useState(null);
-  const [inputValue, setInputValue] = useState('');
   const selectedDateObj = new Date(selectedDate);
   selectedDateObj.setHours(0, 0, 0, 0);
 
