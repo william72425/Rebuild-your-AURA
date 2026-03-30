@@ -240,6 +240,7 @@ function HabitsPage({ habits, setHabits }) {
             habits={filteredHabits}
             selectedDate={selectedDate}
             onUpdateHabitStatus={updateHabitStatus}
+            onDeleteHabit={deleteHabit}
           />
         </>
       )}
