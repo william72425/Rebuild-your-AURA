@@ -3,36 +3,60 @@ import React from 'react';
 function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit }) {
   const selectedDateObj = new Date(selectedDate);
   selectedDateObj.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const getHabitStatus = (habit) => {
     const record = (habit.records || []).find(r =>
       new Date(r.date).toDateString() === selectedDateObj.toDateString()
     );
-
+    
     if (!record) {
       return { status: 'no_data', value: null };
     }
-
+    
     if (record.value === true) {
       return { status: 'completed', value: true };
     }
-
+    
     if (record.value === false) {
       return { status: 'not_completed', value: false };
     }
-
+    
     return { status: 'no_data', value: null };
   };
 
   const getStatusStyle = (status) => {
-    switch (status) {
+    switch(status) {
       case 'completed':
-        return { bg: '#e8f5e9', border: '#4CAF50', text: '#2e7d32', icon: '✅' };
+        return { bg: '#e8f5e9', border: '#4CAF50', text: '#2e7d32', icon: '✅', btnText: '✓ Completed', btnBg: '#4CAF50' };
       case 'not_completed':
-        return { bg: '#ffebee', border: '#f44336', text: '#c62828', icon: '❌' };
+        return { bg: '#ffebee', border: '#f44336', text: '#c62828', icon: '❌', btnText: '✗ Not Completed', btnBg: '#f44336' };
       default:
-        return { bg: '#f5f5f5', border: '#ccc', text: '#999', icon: '⚪' };
+        return { bg: '#f5f5f5', border: '#ccc', text: '#999', icon: '⚪', btnText: '⚪ No Record', btnBg: '#ccc' };
     }
+  };
+
+  // Calculate if habit was completed on a specific date
+  const isCompletedOnDate = (habit, date) => {
+    return (habit.records || []).some(r => 
+      r.value === true && new Date(r.date).toDateString() === date.toDateString()
+    );
+  };
+
+  // Calculate streak based on consecutive completed days
+  const calculateStreak = (habit, currentDate) => {
+    let streak = 0;
+    let checkDate = new Date(currentDate);
+    checkDate.setHours(0, 0, 0, 0);
+    
+    while (true) {
+      const hasCompleted = isCompletedOnDate(habit, checkDate);
+      if (!hasCompleted) break;
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+    return streak;
   };
 
   return (
@@ -40,7 +64,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
       <h3 style={{ color: 'white', marginBottom: '15px' }}>
         📋 {selectedDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
       </h3>
-
+      
       {habits.length === 0 ? (
         <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '40px', textAlign: 'center', color: 'white' }}>
           No habits yet. Add your first habit!
@@ -50,7 +74,8 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
           {habits.map(habit => {
             const { status } = getHabitStatus(habit);
             const style = getStatusStyle(status);
-
+            const currentStreak = calculateStreak(habit, today);
+            
             return (
               <div
                 key={habit.id}
@@ -72,10 +97,11 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
                     <span style={{ fontWeight: 'bold', fontSize: '16px', color: style.text }}>{habit.name}</span>
                   </div>
                   <div style={{ fontSize: '12px', color: '#666' }}>
-                    {habit.type} • 🔥 {habit.streak || 0} day streak
+                    {habit.type} • 🔥 Current streak: <strong style={{ color: '#ff9800' }}>{currentStreak}</strong> days
+                    {habit.longestStreak > 0 && ` • Best: ${habit.longestStreak}`}
                   </div>
                 </div>
-
+                
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {status !== 'completed' && (
                     <button
@@ -94,7 +120,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
                       ✓ Complete
                     </button>
                   )}
-
+                  
                   {status !== 'not_completed' && (
                     <button
                       onClick={() => onUpdateHabitStatus(habit.id, selectedDateObj, 'not_completed')}
@@ -112,7 +138,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
                       ✗ Not Complete
                     </button>
                   )}
-
+                  
                   {status !== 'no_data' && (
                     <button
                       onClick={() => onUpdateHabitStatus(habit.id, selectedDateObj, 'no_data')}
@@ -129,7 +155,7 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
                       ↺ Clear
                     </button>
                   )}
-
+                  
                   <button
                     onClick={() => onDeleteHabit(habit.id)}
                     style={{
@@ -150,13 +176,14 @@ function DayHabitList({ habits, selectedDate, onUpdateHabitStatus, onDeleteHabit
           })}
         </div>
       )}
-
+      
       <div style={{ marginTop: '20px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', color: 'white', fontSize: '12px', textAlign: 'center' }}>
         💡 <strong>How it works:</strong><br />
-        ✅ Complete = You did it!<br />
-        ❌ Not Complete = You didn't do it<br />
-        ↺ Clear = Remove record (no data)<br />
-        🗑 Delete = Remove habit permanently
+        ✅ Complete = You did it! (Green)<br />
+        ❌ Not Complete = You didn't do it (Red)<br />
+        ↺ Clear = Remove record (Gray)<br />
+        🗑 Delete = Remove habit permanently<br />
+        🔥 Streak = Consecutive days marked as "Complete"
       </div>
     </div>
   );
