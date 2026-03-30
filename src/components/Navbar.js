@@ -2,9 +2,9 @@ import React from 'react';
 
 function Navbar({ currentPage, setCurrentPage }) {
   const menuItems = [
-    { id: 'home', label: '🏠 Home', icon: '🏠' },
-    { id: 'habits', label: '📊 Habits', icon: '📊' },
-    { id: 'challenges', label: '🏆 Challenges', icon: '🏆' }
+    { id: 'home', label: '🏠 Home' },
+    { id: 'habits', label: '📊 Habits' },
+    { id: 'challenges', label: '🏆 Challenges' }
   ];
 
   return (
@@ -24,18 +24,20 @@ function Navbar({ currentPage, setCurrentPage }) {
         margin: '0 auto',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '10px'
       }}>
         <div style={{ fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           🌟 Aura System
         </div>
-        <div style={{ display: 'flex', gap: '20px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {menuItems.map(item => (
             <button
               key={item.id}
               onClick={() => setCurrentPage(item.id)}
               style={{
-                padding: '10px 20px',
+                padding: '8px 20px',
                 background: currentPage === item.id ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'transparent',
                 color: currentPage === item.id ? 'white' : '#333',
                 border: 'none',
