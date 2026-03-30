@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function HabitEntryModal({ habit, date, onSave, onClose }) {
+function HabitEntryModal({ habit, date, onSave, onMarkNotCompleted, onClose }) {
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -48,6 +48,13 @@ function HabitEntryModal({ habit, date, onSave, onClose }) {
       finalValue = parseFloat(value);
     }
     onSave(habit.id, date, finalValue, notes);
+    onClose();
+  };
+
+  const handleNotCompleted = () => {
+    if (onMarkNotCompleted) {
+      onMarkNotCompleted(habit.id, date);
+    }
     onClose();
   };
 
@@ -113,6 +120,22 @@ function HabitEntryModal({ habit, date, onSave, onClose }) {
           </div>
         )}
 
+        {habit.targetType === 'boolean' && (
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              background: '#e8f5e9',
+              padding: '15px',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <span style={{ fontSize: '48px' }}>✅</span>
+              <p style={{ marginTop: '8px', color: '#2e7d32' }}>
+                Mark this habit as completed for {dateStr}?
+              </p>
+            </div>
+          </div>
+        )}
+
         <div style={{ marginBottom: '20px' }}>
           <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
             Notes (optional):
@@ -132,7 +155,7 @@ function HabitEntryModal({ habit, date, onSave, onClose }) {
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button
             onClick={handleSave}
             style={{
@@ -146,10 +169,11 @@ function HabitEntryModal({ habit, date, onSave, onClose }) {
               fontWeight: 'bold'
             }}
           >
-            Save Entry
+            {habit.targetType === 'boolean' ? '✓ Mark Complete' : '✓ Save Entry'}
           </button>
+          
           <button
-            onClick={() => onUpdateHabitStatus(habit.id, date, 'not_completed')}
+            onClick={handleNotCompleted}
             style={{
               flex: 1,
               padding: '12px',
@@ -160,8 +184,9 @@ function HabitEntryModal({ habit, date, onSave, onClose }) {
               cursor: 'pointer'
             }}
           >
-            Mark Not Done
+            ✗ Mark Not Done
           </button>
+          
           <button
             onClick={onClose}
             style={{
