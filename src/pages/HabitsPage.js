@@ -16,6 +16,8 @@ function HabitsPage({ habits, setHabits }) {
     category: 'health',
     type: 'daily',
     targetType: 'boolean',
+    targetUnit: '',
+    targetValue: '',
     color: '#' + Math.floor(Math.random() * 16777215).toString(16)
   });
 
@@ -33,6 +35,17 @@ function HabitsPage({ habits, setHabits }) {
     { id: 'all', name: 'All', icon: '📋' },
     { id: 'daily', name: 'Daily', icon: '📅' },
     { id: 'weekly', name: 'Weekly', icon: '📆' }
+  ];
+
+  // Target Types with their units and input types
+  const targetTypes = [
+    { id: 'boolean', name: 'Yes/No', icon: '✅❌', placeholder: '', unit: '' },
+    { id: 'count', name: 'Count', icon: '🔢', placeholder: 'e.g., 10 pushups', unit: 'times' },
+    { id: 'duration', name: 'Duration', icon: '⏱️', placeholder: 'e.g., 30', unit: 'minutes' },
+    { id: 'time', name: 'Time', icon: '⏰', placeholder: 'e.g., 22:00', unit: 'PM' },
+    { id: 'volume', name: 'Volume', icon: '💧', placeholder: 'e.g., 2', unit: 'litres' },
+    { id: 'pages', name: 'Pages', icon: '📖', placeholder: 'e.g., 20', unit: 'pages' },
+    { id: 'distance', name: 'Distance', icon: '🏃', placeholder: 'e.g., 5', unit: 'km' }
   ];
 
   const addHabit = () => {
@@ -54,13 +67,15 @@ function HabitsPage({ habits, setHabits }) {
         category: 'health',
         type: 'daily',
         targetType: 'boolean',
+        targetUnit: '',
+        targetValue: '',
         color: '#' + Math.floor(Math.random() * 16777215).toString(16)
       });
       setShowAddModal(false);
     }
   };
 
-  const updateHabitStatus = (habitId, date, newStatus) => {
+  const updateHabitStatus = (habitId, date, newStatus, customValue = null) => {
     const dateStr = date.toDateString();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -75,13 +90,21 @@ function HabitsPage({ habits, setHabits }) {
         newRecords.splice(existingIndex, 1);
       }
 
+      // Add record based on habit type
+      let recordValue = true;
+      if (habit.targetType === 'boolean') {
+        recordValue = newStatus === 'completed';
+      } else if (habit.targetType !== 'boolean') {
+        recordValue = customValue !== null ? customValue : (newStatus === 'completed' ? habit.targetValue : 0);
+      }
+
       if (newStatus === 'completed') {
-        newRecords.push({ date: date.toISOString(), value: true });
+        newRecords.push({ date: date.toISOString(), value: recordValue });
       } else if (newStatus === 'not_completed') {
         newRecords.push({ date: date.toISOString(), value: false });
       }
 
-      // Calculate streak based on consecutive completed days from today backwards
+      // Calculate streak based on consecutive completed days
       let streak = 0;
       let checkDate = new Date(today);
       while (true) {
@@ -131,6 +154,12 @@ function HabitsPage({ habits, setHabits }) {
     if (filterType !== 'all' && habit.type !== filterType) return false;
     return true;
   });
+
+  // Get target type display info
+  const getTargetTypeInfo = (targetType) => {
+    const found = targetTypes.find(t => t.id === targetType);
+    return found || targetTypes[0];
+  };
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -260,6 +289,7 @@ function HabitsPage({ habits, setHabits }) {
             selectedDate={selectedDate}
             onUpdateHabitStatus={updateHabitStatus}
             onDeleteHabit={deleteHabit}
+            targetTypes={targetTypes}
           />
         </>
       )}
@@ -309,15 +339,18 @@ function HabitsPage({ habits, setHabits }) {
             borderRadius: '20px',
             padding: '30px',
             maxWidth: '500px',
-            width: '90%'
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto'
           }}>
-            <h2>Add New Habit</h2>
+            <h2 style={{ marginBottom: '20px' }}>✨ Add New Habit</h2>
 
-            <label>Habit Name:</label>
+            <label style={{ fontWeight: 'bold' }}>Habit Name:</label>
             <input
               type="text"
               value={newHabit.name}
               onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+              placeholder="e.g., Morning Meditation, Read Books, Drink Water"
               style={{
                 width: '100%',
                 padding: '10px',
@@ -327,7 +360,7 @@ function HabitsPage({ habits, setHabits }) {
               }}
             />
 
-            <label>Category:</label>
+            <label style={{ fontWeight: 'bold' }}>Category:</label>
             <select
               value={newHabit.category}
               onChange={(e) => setNewHabit({ ...newHabit, category: e.target.value })}
@@ -344,7 +377,7 @@ function HabitsPage({ habits, setHabits }) {
               ))}
             </select>
 
-            <label>Type:</label>
+            <label style={{ fontWeight: 'bold' }}>Habit Type:</label>
             <select
               value={newHabit.type}
               onChange={(e) => setNewHabit({ ...newHabit, type: e.target.value })}
@@ -360,6 +393,99 @@ function HabitsPage({ habits, setHabits }) {
               <option value="weekly">📆 Weekly</option>
             </select>
 
+            <label style={{ fontWeight: 'bold' }}>Target Type:</label>
+            <select
+              value={newHabit.targetType}
+              onChange={(e) => {
+                const selected = targetTypes.find(t => t.id === e.target.value);
+                setNewHabit({ 
+                  ...newHabit, 
+                  targetType: e.target.value,
+                  targetUnit: selected?.unit || '',
+                  targetValue: ''
+                });
+              }}
+              style={{
+                width: '100%',
+                padding: '10px',
+                margin: '10px 0',
+                borderRadius: '8px',
+                border: '1px solid #ddd'
+              }}
+            >
+              {targetTypes.map(type => (
+                <option key={type.id} value={type.id}>
+                  {type.icon} {type.name} {type.unit ? `(${type.unit})` : ''}
+                </option>
+              ))}
+            </select>
+
+            {newHabit.targetType !== 'boolean' && (
+              <>
+                <label style={{ fontWeight: 'bold' }}>
+                  Target {getTargetTypeInfo(newHabit.targetType).name}:
+                </label>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <input
+                    type={newHabit.targetType === 'time' ? 'time' : 'number'}
+                    step={newHabit.targetType === 'duration' ? '1' : '0.1'}
+                    value={newHabit.targetValue}
+                    onChange={(e) => setNewHabit({ ...newHabit, targetValue: e.target.value })}
+                    placeholder={getTargetTypeInfo(newHabit.targetType).placeholder}
+                    style={{
+                      flex: 2,
+                      padding: '10px',
+                      margin: '10px 0',
+                      borderRadius: '8px',
+                      border: '1px solid #ddd'
+                    }}
+                  />
+                  <span style={{ flex: 1, color: '#666' }}>
+                    {getTargetTypeInfo(newHabit.targetType).unit}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {newHabit.targetType === 'boolean' && (
+              <div style={{
+                background: '#e8f5e9',
+                padding: '10px',
+                borderRadius: '8px',
+                margin: '10px 0',
+                fontSize: '12px',
+                color: '#2e7d32'
+              }}>
+                ✅ Simple Yes/No habit - just mark complete or not complete
+              </div>
+            )}
+
+            {newHabit.targetType === 'volume' && (
+              <div style={{
+                background: '#e3f2fd',
+                padding: '10px',
+                borderRadius: '8px',
+                margin: '10px 0',
+                fontSize: '12px',
+                color: '#1565c0'
+              }}>
+                💧 Example: Drink 2 litres of water daily
+              </div>
+            )}
+
+            {newHabit.targetType === 'time' && (
+              <div style={{
+                background: '#fff3e0',
+                padding: '10px',
+                borderRadius: '8px',
+                margin: '10px 0',
+                fontSize: '12px',
+                color: '#e65100'
+              }}>
+                ⏰ Example: Sleep before 11:00 PM
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button
                 onClick={addHabit}
@@ -370,10 +496,11 @@ function HabitsPage({ habits, setHabits }) {
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
                 }}
               >
-                Add Habit
+                ➕ Add Habit
               </button>
               <button
                 onClick={() => setShowAddModal(false)}
