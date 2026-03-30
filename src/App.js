@@ -16,7 +16,6 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem('habits', JSON.stringify(habits));
   }, [habits]);
