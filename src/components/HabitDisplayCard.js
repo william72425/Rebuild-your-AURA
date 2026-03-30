@@ -1,6 +1,6 @@
 import React from 'react';
 
-function HabitDisplayCard({ habit, onPress }) {
+function HabitDisplayCard({ habit, onPress, onDelete }) {
   const getTargetTypeInfo = () => {
     const types = {
       boolean: { icon: '✅❌', label: 'Yes/No' },
@@ -63,8 +63,8 @@ function HabitDisplayCard({ habit, onPress }) {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '22px' }}>{getCategoryIcon()}</span>
             <h3 style={{ margin: 0, fontSize: '18px' }}>{habit.name}</h3>
           </div>
@@ -109,6 +109,24 @@ function HabitDisplayCard({ habit, onPress }) {
               Best: {habit.longestStreak}
             </div>
           )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            style={{
+              marginTop: '8px',
+              padding: '4px 12px',
+              background: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '11px'
+            }}
+          >
+            🗑 Delete
+          </button>
         </div>
       </div>
     </div>
