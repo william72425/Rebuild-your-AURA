@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
-  // Habit များ သိမ်းမယ်
   const [habits, setHabits] = useState(() => {
     const saved = localStorage.getItem('habits');
     return saved ? JSON.parse(saved) : [];
   });
-
-  // Habit အသစ်ထည့်မယ်
   const [newHabit, setNewHabit] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Habit add လုပ်တဲ့ function
+  const categories = ['all', 'health', 'productivity', 'learning', 'mindfulness'];
+
   const addHabit = () => {
     if (newHabit.trim()) {
       setHabits([
@@ -18,158 +17,318 @@ function App() {
         {
           id: Date.now(),
           name: newHabit,
+          category: 'productivity',
           streak: 0,
           lastCompleted: null,
-          completed: []
+          completed: [],
+          color: '#' + Math.floor(Math.random()*16777215).toString(16)
         }
       ]);
       setNewHabit('');
     }
   };
 
-  // Habit complete လုပ်တဲ့ function
   const completeHabit = (id) => {
     const today = new Date().toDateString();
     setHabits(habits.map(habit => {
-      if (habit.id === id) {
-        // ဒီနေ့ ပြီးပြီလား စစ်မယ်
-        if (habit.lastCompleted !== today) {
-          return {
-            ...habit,
-            streak: habit.streak + 1,
-            lastCompleted: today,
-            completed: [...habit.completed, today]
-          };
-        }
+      if (habit.id === id && habit.lastCompleted !== today) {
+        return {
+          ...habit,
+          streak: habit.streak + 1,
+          lastCompleted: today,
+          completed: [...habit.completed, today]
+        };
       }
       return habit;
     }));
   };
 
-  // Habit delete လုပ်မယ်
   const deleteHabit = (id) => {
-    setHabits(habits.filter(habit => habit.id !== id));
+    if (window.confirm('Delete this habit?')) {
+      setHabits(habits.filter(habit => habit.id !== id));
+    }
   };
 
-  // Local storage မှာ သိမ်းမယ်
   useEffect(() => {
     localStorage.setItem('habits', JSON.stringify(habits));
   }, [habits]);
 
+  const filteredHabits = selectedCategory === 'all' 
+    ? habits 
+    : habits.filter(h => h.category === selectedCategory);
+
   return (
     <div style={{
-      maxWidth: '600px',
-      margin: '0 auto',
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif'
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '20px'
     }}>
-      <h1 style={{ textAlign: 'center', color: '#4CAF50' }}>
-        🌟 Aura System - Habit Tracker
-      </h1>
-
-      {/* Habit အသစ်ထည့်တဲ့ပုံစံ */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
-        <input
-          type="text"
-          value={newHabit}
-          onChange={(e) => setNewHabit(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && addHabit()}
-          placeholder="Add new habit..."
-          style={{
-            flex: 1,
-            padding: '10px',
-            fontSize: '16px',
-            border: '1px solid #ddd',
-            borderRadius: '8px'
-          }}
-        />
-        <button
-          onClick={addHabit}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          Add
-        </button>
-      </div>
-
-      {/* Habit စာရင်း */}
-      {habits.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#999' }}>
-          No habits yet. Add your first habit above!
-        </p>
-      ) : (
-        habits.map(habit => (
-          <div
-            key={habit.id}
-            style={{
-              backgroundColor: '#f5f5f5',
-              padding: '15px',
-              marginBottom: '10px',
-              borderRadius: '10px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-          >
-            <div>
-              <h3 style={{ margin: '0 0 5px 0' }}>{habit.name}</h3>
-              <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-                🔥 {habit.streak} day streak
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => completeHabit(habit.id)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
-              >
-                ✓ Complete
-              </button>
-              <button
-                onClick={() => deleteHabit(habit.id)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
-              >
-                ✗ Delete
-              </button>
-            </div>
-          </div>
-        ))
-      )}
-
-      {/* Motivation အကြံပေးချက် */}
-      {habits.length > 0 && (
+      <div style={{
+        maxWidth: '800px',
+        margin: '0 auto'
+      }}>
+        {/* Header */}
         <div style={{
-          marginTop: '30px',
-          padding: '15px',
-          backgroundColor: '#e8f5e9',
-          borderRadius: '10px',
-          textAlign: 'center'
+          textAlign: 'center',
+          padding: '40px 20px',
+          color: 'white'
         }}>
-          <p style={{ margin: 0, color: '#2e7d32' }}>
-            💪 Keep going! Total habits: {habits.length} | 
-            Total completions: {habits.reduce((sum, h) => sum + h.completed.length, 0)}
+          <h1 style={{
+            fontSize: '3rem',
+            margin: 0,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+          }}>
+            🌟 Aura System
+          </h1>
+          <p style={{
+            fontSize: '1.2rem',
+            opacity: 0.9,
+            marginTop: '10px'
+          }}>
+            Track habits. Level up your life.
           </p>
         </div>
-      )}
+
+        {/* Add Habit Card */}
+        <div style={{
+          background: 'white',
+          borderRadius: '20px',
+          padding: '25px',
+          marginBottom: '30px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+        }}>
+          <h2 style={{ margin: '0 0 15px 0', color: '#333' }}>
+            ✨ Add New Habit
+          </h2>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              value={newHabit}
+              onChange={(e) => setNewHabit(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addHabit()}
+              placeholder="e.g., Morning Meditation, Read 10 pages..."
+              style={{
+                flex: 1,
+                padding: '12px',
+                fontSize: '16px',
+                border: '2px solid #e0e0e0',
+                borderRadius: '12px',
+                outline: 'none',
+                transition: 'border-color 0.3s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#764ba2'}
+              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+            />
+            <button
+              onClick={addHabit}
+              style={{
+                padding: '12px 30px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            >
+              + Add Habit
+            </button>
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div style={{
+          display: 'flex',
+          gap: '10px',
+          marginBottom: '25px',
+          flexWrap: 'wrap'
+        }}>
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              style={{
+                padding: '8px 20px',
+                background: selectedCategory === cat ? 'white' : 'rgba(255,255,255,0.2)',
+                color: selectedCategory === cat ? '#764ba2' : 'white',
+                border: 'none',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                transition: 'all 0.3s'
+              }}
+            >
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Habits List */}
+        {filteredHabits.length === 0 ? (
+          <div style={{
+            background: 'rgba(255,255,255,0.1)',
+            borderRadius: '20px',
+            padding: '60px 20px',
+            textAlign: 'center',
+            color: 'white'
+          }}>
+            <p style={{ fontSize: '1.2rem' }}>✨ No habits yet</p>
+            <p style={{ opacity: 0.8 }}>Add your first habit above and start your journey!</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            {filteredHabits.map(habit => (
+              <div
+                key={habit.id}
+                style={{
+                  background: 'white',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                  animation: 'slideIn 0.3s ease-out'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '15px'
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      marginBottom: '8px'
+                    }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        background: habit.color,
+                        boxShadow: `0 0 8px ${habit.color}`
+                      }}></div>
+                      <h3 style={{ margin: 0, color: '#333' }}>{habit.name}</h3>
+                    </div>
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                      <span style={{
+                        background: '#ff9800',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}>
+                        🔥 {habit.streak} day streak
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#999' }}>
+                        ✅ {habit.completed.length} total completions
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      onClick={() => completeHabit(habit.id)}
+                      style={{
+                        padding: '10px 20px',
+                        background: 'linear-gradient(135deg, #4CAF50, #45a049)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        transition: 'transform 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      ✓ Complete
+                    </button>
+                    <button
+                      onClick={() => deleteHabit(habit.id)}
+                      style={{
+                        padding: '10px 20px',
+                        background: 'linear-gradient(135deg, #f44336, #d32f2f)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'transform 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      ✗ Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Stats Card */}
+        {habits.length > 0 && (
+          <div style={{
+            marginTop: '30px',
+            background: 'rgba(255,255,255,0.15)',
+            borderRadius: '16px',
+            padding: '20px',
+            backdropFilter: 'blur(10px)',
+            color: 'white'
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', textAlign: 'center' }}>📊 Your Progress</h3>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '15px',
+              textAlign: 'center'
+            }}>
+              <div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{habits.length}</div>
+                <div style={{ fontSize: '12px', opacity: 0.8 }}>Active Habits</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                  {habits.reduce((sum, h) => sum + h.streak, 0)}
+                </div>
+                <div style={{ fontSize: '12px', opacity: 0.8 }}>Total Streak Days</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                  {habits.reduce((sum, h) => sum + h.completed.length, 0)}
+                </div>
+                <div style={{ fontSize: '12px', opacity: 0.8 }}>Total Completions</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add CSS animation */}
+      <style>
+        {`
+          @keyframes slideIn {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }
